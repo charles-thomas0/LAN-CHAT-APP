@@ -1,7 +1,7 @@
 # ALL EXTERNAL LIBRARIES ARE IN HERE
 # MAKES SURE ALL DEPENDENCIES ARE MET!
 
-import customtkinter
+#import customtkinter
 import socket
 import socketserver
 import random
