@@ -1,37 +1,49 @@
 from dependencies import *
 
-SERVER_HOST = "127.0.0.1"
-SERVER_PORT = 5002
-separator_token = "<SEP>"
+# Listen for connections
 
-client_sockets = set()
-s = socket.socket()
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind((SERVER_HOST, SERVER_PORT))
-s.listen(5)
-print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
+def start_server():
+    host = "127.0.0.1"
+    port = 65432
 
-def listen_for_client(cs):
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(5)
+    print(f"server is open and listening for connections on {host}:{port}")
+
     while True:
+        client_socket, client_address = server_socket.accept()
+        print(f"connected to {client_address}")
+        client_socket.close()
+
+# Sync with DB
+
+def fetch_messages():
+    connection = db_connection()
+    if connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT * from messages;")
+        messages = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return messages
+    return
+
+# Test with DB
+
+
+def test_server_db_connection():
+    conn = db_connection()
+    if conn:
+        print("server connected")
         try:
-            msg = cs.recv(1024).decode()
-        except Exception as e:
-            print(f"[!] Error: {e}")
-            client_sockets.remove(cs)
-        else:
-            msg = msg.replace(separator_token, ": ")
-        for client_socket_1 in client_sockets:
-            client_socket_1.send(msg.encode())
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from messages;")
+            result = cursor.fetchone()
+            print(result)
+        finally:
+            conn.close()
+            print("connection closed")
 
-while True:
-    client_socket, client_address = s.accept()
-    print(f"[+] {client_address} connected.")
-    client_sockets.add(client_socket)
-    t = Thread(target=listen_for_client, args=(client_socket,))
-    t.daemon = True
-    t.start()
-
-# Move the closing of sockets outside the loop
-for cs in client_sockets:
-    cs.close()
-s.close()
+if __name__ == "__main__":
+    start_server()
