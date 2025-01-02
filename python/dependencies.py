@@ -1,15 +1,16 @@
 # ALL EXTERNAL LIBRARIES ARE IN HERE
 # MAKES SURE ALL DEPENDENCIES ARE MET!
 
-#import customtkinter
+import customtkinter
 import socket
 import socketserver
 import random
-from threading import Thread
-from datetime import datetime
+import threading
 from colorama import Fore, init
 import psycopg2
-from wsgiref.simple_server import server_version
+import wsgiref.simple_server
+from psycopg2.extras import RealDictCursor
+import json
 
 # Database Connection
 
